@@ -1,36 +1,37 @@
 //Logic for the registration of the user
 const asyncHandler = require("express-async-handler");
 const User = require("../models/usermodel");
+const generateToken=require('../config/generateToken');
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, pic } = req.body;
 
-  if (!name || !email || !password) {               //If any of the fields is missing
+  if (!name || !email || !password) {                //If any of the fields is missing
     res.status(400);
     throw new Error("Please enter all the fields");
   }
 
-  const userExists = await User.findOne({ email }); //Checking if a user with the same email already exists
+  const userExists = await User.findOne({ email });  //Checking if a user with the same email already exists
 
   if (userExists) {
     res.status(400);
     throw new Error("User already exists");
   }
 
-  const user = await User.create({                 //Creating a new user
+  const user = await User.create({                    //Creating a new user
     name,
     email,
     password,
     pic,
   }); 
 
-  if (user) {                                      //If user is created successfully
+  if (user) {                                       //If user is created successfully
     res.status(201).json({                         
       _id: user._id,                               
       name: user.name,
       email: user.email,
       pic: user.pic,
-      token:generateToken(user._id),               //Generating a token for the user because it is required for authentication
+      token:generateToken(user._id),      //Generating a JWT token for the user because it is required for authentication
     });
   } else {
     res.status(400);
@@ -38,4 +39,24 @@ const registerUser = asyncHandler(async (req, res) => {
   } 
 });
 
-module.exports={registerUser};
+
+const authUser=asyncHandler(async(req,res)=>{
+  const{email,password}=req.body;
+  const user=await User.findOne({email});
+  if(user && (await user.matchPassword(password))){
+    res.json({
+      _id:user._id,
+      name:user.name,
+      email:user.email,
+      pic:user.pic,
+      token:generateToken(user._id),
+    });
+  }else{
+  res.status(401);
+  throw new Error("Invalid Email or Password");
+  }
+});
+ 
+
+
+module.exports={registerUser, authUser};
