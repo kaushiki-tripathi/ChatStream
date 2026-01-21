@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import {
-  Stack,
-  TextField,
-  IconButton,
-  InputAdornment,
-  Button,
-  Snackbar,
-  Alert, CircularProgress
-} from "@mui/material";
+import axios from "axios";
+import { useNavigate } from "react-router-dom"; 
+import {Stack,TextField,IconButton,InputAdornment,Button,Snackbar,Alert, CircularProgress} from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Signuppage = () => {
@@ -18,10 +12,9 @@ const Signuppage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [pic, setPic] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // ✅ Material-UI toast state
   const [open, setOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") return;
@@ -30,7 +23,6 @@ const Signuppage = () => {
 
   const postDetails = (pics) => {
     setLoading(true);
-
     if (pics === undefined) {
       setToastMsg("Please select an image!");
       setOpen(true);
@@ -49,6 +41,7 @@ const Signuppage = () => {
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log(data);
           setPic(data.secure_url);
           setLoading(false);
         })
@@ -66,23 +59,42 @@ const Signuppage = () => {
     }
   };
 
-  const submitHandler = () => {
-    if (!name || !email || !password || !confirmpassword) {
-      setToastMsg("Please fill all the fields");
-      setOpen(true);
-      return;
-    }
-
-    if (password !== confirmpassword) {
-      setToastMsg("Passwords do not match");
-      setOpen(true);
-      return;
-    }
-
-    // backend call will go here later
-    setToastMsg("Signup logic will be added next");
+  const submitHandler = async () => {
+    setLoading(true);
+  if (!name || !email || !password || !confirmpassword) {
+    setToastMsg("Please fill all the fields");
     setOpen(true);
-  };
+    return;
+  }
+
+  if (password !== confirmpassword) {
+    setToastMsg("Passwords do not match");
+    setOpen(true);
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    const { data } = await axios.post("/api/user/register",{ name, email, password, pic },config);
+    setToastMsg("Registration Successful");
+
+    localStorage.setItem("userInfo", JSON.stringify(data));              // Storing user info in local storage
+    setLoading(false);
+    navigate("/chats");
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    setToastMsg(error.response?.data?.message || "Error occurred during signup");
+    setOpen(true);
+    setLoading(false);
+  }
+};
 
   return (
     <>
