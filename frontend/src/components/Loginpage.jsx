@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {Stack,TextField,IconButton,InputAdornment,Button,CircularProgress,Snackbar,Alert,} from "@mui/material";
+import {Stack,TextField,IconButton,InputAdornment,Button,CircularProgress,Snackbar,Alert, } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Loginpage = () => {
@@ -103,8 +103,9 @@ const Loginpage = () => {
             setEmail("guest@example.com");
             setPassword("123456");
           }}
+          disabled={loading}
         >
-          Get Guest User Credentials
+          {loading ? <CircularProgress size={24} /> : "Get Guest User Credentials"}
         </Button>
       </Stack>
 
