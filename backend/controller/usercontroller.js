@@ -58,5 +58,17 @@ const authUser=asyncHandler(async(req,res)=>{
 });
  
 
+const allUsers=asyncHandler(async(req,res)=>{                      //To fetch all users except the logged in user
+  const keyword=req.query.search ? {                               //If there is a search query
+    $or:[                                                          //Searching by name or email
+      {name:{$regex:req.query.search,$options:"i"}},               
+      {email:{$regex:req.query.search,$options:"i"}},
+    ],
+  }:{};
+  const users=await User.find(keyword).find({_id:{$ne:req.user._id}});        //Finding all users except the logged in user because ($ne means not equal) only those users should be shown with whom the logged in user can chat 
+  res.send(users);                                                 //Sending the list of users as response
+});
 
-module.exports={registerUser, authUser};
+
+
+module.exports={registerUser, authUser, allUsers};
