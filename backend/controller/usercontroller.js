@@ -58,7 +58,7 @@ const authUser=asyncHandler(async(req,res)=>{
 });
  
 
-const allUsers=asyncHandler(async(req,res)=>{                      //To fetch all users except the logged in user
+const allUsers = asyncHandler(async(req,res)=>{                      //To fetch all users except the logged in user
   const keyword=req.query.search ? {                               //If there is a search query
     $or:[                                                          //Searching by name or email
       {name:{$regex:req.query.search,$options:"i"}},               

@@ -3,6 +3,7 @@ const dotenv=require('dotenv');               // To store secret values safely i
 const { chats } = require('./dummydata');     // Temporary fake data used for testing before connecting a real database
 const connectDB = require('./config/db');          // Importing the database connection function
 const userRoutes=require('./routes/userRoutes');
+const chatRoutes=require('./routes/chatRoutes');
 const { notFound, errorHandler } = require('./middlewares/errorMiddlewares');
 
 const app=express();          
@@ -15,7 +16,8 @@ app.get('/',(req,res)=>{
   res.send("API is running");
 })
 
-app.use('/api/user',userRoutes);                   //Using user routes for handling user related requests
+app.use("/api/user", userRoutes);                  //Using user routes for handling user related requests
+app.use("/api/chat", chatRoutes);                   //Using chat routes for handling chat related requests
 
 
 app.use(notFound);                               // Handling not found errors
