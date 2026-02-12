@@ -1,28 +1,34 @@
-import React from 'react'
-import axios from 'axios';
-import { useEffect,useState } from 'react';
+import { Box } from '@mui/material';
+import SideDrawer from '../components/miscellaneous/SideDrawer';
+import MyChats from '../components/MyChats';
+import Chatbox from '../components/ChatBox';
+import { useState } from 'react';
+import { ChatState } from '../context/ChatProvider';
 
 const Chatpage = () => {
-const [chats,setChats]=useState([]);
-
-
-  const fetchChats = async () => {                          // API call to fetch chats will go here
-    const {data}=await axios.get('/api/chat');
-    setChats(Array.isArray(data)?data:data.chats ||[]);
-  };
-
-  useEffect(() => {
-    fetchChats();
-  }, []);
-
+  const [fetchAgain, setFetchAgain] = useState(false);
+  const { user } = ChatState();
   return (
-    <div>
-      <h1>Chat Page loaded</h1>
-      {chats.map((chat) => (
-        <div key={chat._id}>{chat.chatName}</div>
-      ))}
-      </div>
-  )
-}
+    <Box width="100%">
+      {user && <SideDrawer />}
 
-export default Chatpage
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        width="100%"
+        height="100vh"
+        p={1}
+      >
+        {user && <MyChats fetchAgain={fetchAgain} />}
+        {user && (
+          <Chatbox
+            fetchAgain={fetchAgain}
+            setFetchAgain={setFetchAgain}
+          />
+        )}
+      </Box>
+    </Box>
+  )
+};
+
+export default Chatpage;

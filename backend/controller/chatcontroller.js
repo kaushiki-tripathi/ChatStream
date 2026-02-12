@@ -103,8 +103,6 @@ const createGroupChat = asyncHandler(async (req, res) => {
 
 
 
-
-
 const renameGroup = asyncHandler(async (req, res) => {
   const { chatId, chatName } = req.body;
   const updatedChat = await Chat.findByIdAndUpdate(
@@ -126,8 +124,6 @@ const renameGroup = asyncHandler(async (req, res) => {
 
 
 
-
-
 const addToGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
   const added = await Chat.findByIdAndUpdate(
@@ -144,7 +140,6 @@ const addToGroup = asyncHandler(async (req, res) => {
     res.json(added);
   }
 });
-
 
 
 

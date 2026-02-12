@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -10,7 +11,15 @@ import Login from "../components/Loginpage";
 import Signup from "../components/Signuppage";
 
 function Homepage() {
+  const navigate = useNavigate();
   const [value, setValue] = useState("1");
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("userInfo"));
+    if (user) {
+      navigate("/chats");
+    }
+  }, [navigate]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
