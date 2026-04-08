@@ -33,9 +33,9 @@ const Signuppage = () => {
     if (pics.type === "image/jpeg" || pics.type === "image/png" || pics.type === "image/jpg") {
       const data = new FormData();
       data.append("file", pics);
-      data.append("upload_preset", "chatstream");
+      data.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
-      fetch("https://api.cloudinary.com/v1_1/dhmbld7ho/image/upload", {
+      fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: "post",
         body: data,
       })
@@ -64,12 +64,14 @@ const Signuppage = () => {
   if (!name || !email || !password || !confirmpassword) {
     setToastMsg("Please fill all the fields");
     setOpen(true);
+    setLoading(false);
     return;
   }
 
   if (password !== confirmpassword) {
     setToastMsg("Passwords do not match");
     setOpen(true);
+    setLoading(false);
     return;
   }
 

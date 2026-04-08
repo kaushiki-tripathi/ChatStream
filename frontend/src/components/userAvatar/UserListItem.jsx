@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Typography, Avatar } from "@mui/material";
-import { ChatState } from "../../context/ChatProvider";
 
 const UserListItem = ({ user, handleFunction }) => {
   return (

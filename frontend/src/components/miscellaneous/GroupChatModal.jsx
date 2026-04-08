@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Modal,
   Box,
@@ -6,6 +6,8 @@ import {
   Button,
   TextField,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import axios from "axios";
 import { ChatState } from "../../context/ChatProvider";
@@ -34,12 +36,18 @@ const GroupChatModal = ({ children }) => {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ open: false, msg: "", type: "info" });
+  const debounceTimer = useRef(null);
 
   const { user, chats, setChats } = ChatState();
 
+  const showToast = (msg, type = "warning") => {
+    setToast({ open: true, msg, type });
+  };
+
   const handleGroup = (userToAdd) => {
-    if (selectedUsers.includes(userToAdd)) {
-      alert("User already added"); // Chakra toast replacement
+    if (selectedUsers.find((u) => u._id === userToAdd._id)) {
+      showToast("User already added", "warning");
       return;
     }
 
@@ -49,25 +57,32 @@ const GroupChatModal = ({ children }) => {
   const handleSearch = async (query) => {
     setSearch(query);
 
-    if (!query) return;
-
-    try {
-      setLoading(true);
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-
-      const { data } = await axios.get(`/api/user?search=${query}`, config);
-
-      setLoading(false);
-      setSearchResult(data);
-    } catch (error) {
-      setLoading(false);
-      alert("Failed to Load Search Results");
+    if (!query) {
+      setSearchResult([]);
+      return;
     }
+
+    // Debounce: wait 400ms after user stops typing before firing API call
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        setLoading(true);
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+
+        const { data } = await axios.get(`/api/user?search=${query}`, config);
+
+        setLoading(false);
+        setSearchResult(data);
+      } catch (error) {
+        setLoading(false);
+        showToast("Failed to Load Search Results", "error");
+      }
+    }, 400);
   };
 
   const handleDelete = (delUser) => {
@@ -76,7 +91,7 @@ const GroupChatModal = ({ children }) => {
 
   const handleSubmit = async () => {
     if (!groupChatName || !selectedUsers.length) {
-      alert("Please fill all the fields");
+      showToast("Please fill all the fields", "warning");
       return;
     }
 
@@ -99,9 +114,9 @@ const GroupChatModal = ({ children }) => {
       setChats([data, ...chats]);
       setOpen(false);
 
-      alert("New Group Chat Created!");
+      showToast("New Group Chat Created!", "success");
     } catch (error) {
-      alert("Failed to Create the Chat");
+      showToast("Failed to Create the Chat", "error");
     }
   };
 
@@ -166,6 +181,23 @@ const GroupChatModal = ({ children }) => {
           </Button>
         </Box>
       </Modal>
+
+      {/* Snackbar Toast */}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={4000}
+        onClose={() => setToast({ ...toast, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setToast({ ...toast, open: false })}
+          severity={toast.type}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {toast.msg}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

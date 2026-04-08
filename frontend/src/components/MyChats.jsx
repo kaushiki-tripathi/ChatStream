@@ -9,13 +9,15 @@ import ChatLoading from "./ChatLoading";
 import { getSender } from "../config/ChatLogics";
 
 
-const MyChats = () => {
+const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
   const [toast, setToast] = useState({ open: false, msg: "", type: "error" });
 
   const fetchChats = async () => {
     try {
+      setLoading(true);
       const config = {
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -29,13 +31,15 @@ const MyChats = () => {
         msg: "Failed to load chats",
         type: "error",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
-  }, []);
+  }, [fetchAgain]);
 
   return (
   <Box
@@ -107,7 +111,9 @@ const MyChats = () => {
         p: 1.5,
       }}
     >
-      {chats?.length > 0 ? (
+      {loading ? (
+        <ChatLoading />
+      ) : chats?.length > 0 ? (
         <Stack spacing={1.2}>
           {chats.map((chat) => {
             const isSelected = selectedChat?._id === chat._id;
@@ -165,7 +171,16 @@ const MyChats = () => {
           })}
         </Stack>
       ) : (
-        <ChatLoading />
+        <Typography
+          sx={{
+            textAlign: "center",
+            color: "rgba(255,255,255,0.6)",
+            mt: 4,
+            fontFamily: "Work Sans",
+          }}
+        >
+          No chats yet — search for a user to start chatting!
+        </Typography>
       )}
     </Box>
   </Box>
