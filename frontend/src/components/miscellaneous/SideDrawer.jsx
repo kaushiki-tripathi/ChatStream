@@ -37,10 +37,18 @@ const SideDrawer = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [toast, setToast] = useState({ open: false, msg: "", type: "info" });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [notifAnchor, setNotifAnchor] = useState(null);
 
   const navigate = useNavigate();
 
-  const { setSelectedChat, user, notification, chats, setChats } = ChatState();
+  const {
+    setSelectedChat,
+    user,
+    notification,
+    setNotification,
+    chats,
+    setChats,
+  } = ChatState();
 
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
@@ -141,50 +149,98 @@ const SideDrawer = () => {
           </Button>
         </Tooltip>
 
-        <Typography variant="h6" color="white" fontFamily={"Work Sans"} fontSize={{ xs: "16px", md: "22px" }}>ChatStream</Typography>
+        <Typography
+          variant="h6"
+          color="white"
+          fontFamily={"Work Sans"}
+          fontSize={{ xs: "16px", md: "22px" }}
+        >
+          ChatStream
+        </Typography>
 
         <Box display="flex" alignItems="center">
-          {/* ✅ Updated Notification Badge */}
-          <IconButton sx={{ color: "white" }}>
+          <IconButton
+            sx={{ color: "white" }}
+            onClick={(e) => {
+              //if (notification.length === 0) return; // 🚀 prevents empty menu
+              <MenuItem>{notification.length === 0 ? "No notifications" : null}</MenuItem>
+              setNotifAnchor(e.currentTarget);
+            }}
+          >
             <Badge
               badgeContent={notification?.length}
               color="error"
-              invisible={notification?.length === 0} // hides when 0
+              invisible={notification?.length === 0}
             >
               <NotificationsIcon />
             </Badge>
           </IconButton>
-
-          <Button
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            endIcon={<ArrowDropDownIcon sx={{ color: "#34d399" }}/>}
+          <Menu
+            anchorEl={notifAnchor}
+            open={Boolean(notifAnchor)}
+            onClose={() => setNotifAnchor(null)}
+            PaperProps={{
+              sx: {
+                background: "#0f172a",
+                color: "white",
+                border: "1px solid #059669",
+              },
+            }}
           >
+            {notification.map((notif) => (
+              <MenuItem
+                key={notif._id}
+                onClick={() => {
+                  setSelectedChat(notif.chat);
+                  setNotification(notification.filter((n) => n !== notif));
+                  setNotifAnchor(null);
+                }}
+              >
+                {notif.chat.isGroupChat
+                  ? `New message in ${notif.chat.chatName}`
+                  : `New message`}
+              </MenuItem>
+            ))}
+          </Menu>
+
+          <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
             <Avatar
-              sx={{ width: 30, height: 30, ml: 1}}
+              sx={{ width: 32, height: 32 }}
               src={user.pic}
               alt={user.name}
             />
-          </Button>
+            <ArrowDropDownIcon sx={{ color: "#34d399" }} />
+          </IconButton>
 
-          <Menu fontFamily={"Work Sans"}
-            anchorEl={anchorEl}      
+          <Menu
+            fontFamily={"Work Sans"}
+            anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={() => setAnchorEl(null)}
             PaperProps={{
               sx: {
                 background: "#0f172a",
                 color: "white",
-                border: "1px solid #059669"
-              }
+                border: "1px solid #059669",
+              },
             }}
           >
             <ProfileModal user={user} fontFamily={"Work Sans"}>
-              <MenuItem sx={{ "&:hover": { background: "rgba(52, 211, 153, 0.2)" }}}>My Profile</MenuItem>
+              <MenuItem
+                sx={{ "&:hover": { background: "rgba(52, 211, 153, 0.2)" } }}
+              >
+                My Profile
+              </MenuItem>
             </ProfileModal>
 
             <Divider />
 
-            <MenuItem onClick={logoutHandler} sx={{ "&:hover": { background: "rgba(5, 211, 155, 0.2)" }}}>Logout</MenuItem>
+            <MenuItem
+              onClick={logoutHandler}
+              sx={{ "&:hover": { background: "rgba(5, 211, 155, 0.2)" } }}
+            >
+              Logout
+            </MenuItem>
           </Menu>
         </Box>
       </Box>
@@ -195,14 +251,14 @@ const SideDrawer = () => {
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}
         PaperProps={{
-    sx: {
-      backgroundColor: "#064E3B",    
-      color: "white",
-      width: 320,
-    },
-  }}
+          sx: {
+            backgroundColor: "#064E3B",
+            color: "white",
+            width: 320,
+          },
+        }}
       >
-        <Box width={300} p={2}>
+        <Box sx={{ width: "100%", p: 2 }}>
           <Typography variant="h6" mb={2} color="white">
             Search Users
           </Typography>
@@ -215,25 +271,28 @@ const SideDrawer = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               variant="outlined"
-        sx={{
-          input: { color: "white" },
+              sx={{
+                input: { color: "white" },
 
-          "& .MuiOutlinedInput-root": {
-            "& fieldset": {
-              borderColor: "white",   // white border
-            },
-          },
-        }}
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "white", // white border
+                  },
+                },
+              }}
             />
 
-            <Button variant="contained" onClick={handleSearch}
-            sx={{
-          backgroundColor: "#10b981",
-          color: "white",
-          "&:hover": {
-            backgroundColor: "#059669",
-          },
-        }}>
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              sx={{
+                backgroundColor: "#10b981",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "#059669",
+                },
+              }}
+            >
               Go
             </Button>
           </Box>

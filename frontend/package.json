@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start":"vite --openssl-legacy-provider start",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite  --openssl-legacy-provider build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -19,9 +20,12 @@
     "axios": "^1.13.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-lottie": "^1.2.10",
     "react-router-dom": "^7.12.0",
     "react-scrollable-feed": "^2.0.4",
     "react-toastify": "^11.0.5",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

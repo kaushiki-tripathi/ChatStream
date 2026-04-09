@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import './style.css';
-import  {ChatState}  from "../context/ChatProvider";
+import "./style.css";
+import { ChatState } from "../context/ChatProvider";
 import {
   Box,
   Typography,
@@ -18,19 +18,54 @@ import { getSender } from "../config/ChatLogics";
 import { getSenderFull } from "../config/ChatLogics";
 import ProfileModal from "./miscellaneous/ProfileModal";
 import ScrollableChat from "./ScrollableChat";
+import io from "socket.io-client";
+import Lottie from "react-lottie";
+import animationData from "../animations/typing.json";
 
+const Endpoint = "http://localhost:5000";
+var socket, selectedChatCompare;
+
+const defaultOptions = {
+  loop: true,
+  autoplay: true,
+  animationData: animationData,
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
+};
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
-  const [toastMsg, setToastMsg] = useState({ open: false, title: "", status: "info" });
-  const { user, selectedChat, setSelectedChat } = ChatState();
+  const [toastMsg, setToastMsg] = useState({
+    open: false,
+    title: "",
+    status: "info",
+  });
+  const { user, selectedChat, setSelectedChat, notification, setNotification } = ChatState();
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
+  useEffect(() => {
+    socket = io(Endpoint); // Initialize socket connection
+    socket.emit("setup", user); // Emit setup event with user data
+    socket.on("connected", () => {
+      setSocketConnected(true); // Set socket connection status to true when connected
+    });
+    socket.on("typing", () => {
+      setIsTyping(true); // Set isTyping to true when typing event is received
+    });
+    socket.on("stop typing", () => {
+      setIsTyping(false); // Set isTyping to false when stop typing event is received
+    });
+  }, []);
 
-  const sendMessage = async(e) => {
-     if(e.key === "Enter" && newMessage) {
-      try{
+  const sendMessage = async (e) => {
+    if (e.key === "Enter" && newMessage) {
+      socket.emit("stop typing", selectedChat._id); // Emit stop typing event when message is sent
+      try {
         const config = {
           headers: {
             "Content-Type": "application/json",
@@ -44,13 +79,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             content: newMessage,
             chatId: selectedChat._id,
           },
-          config
+          config,
         );
-        console.log("Message sent:", data);
+        
+        socket.emit("new message", data); // Emit new message event to the server for real-time updates
 
-        // ✅ ONLY CHANGE IS HERE
         setMessages((prevMessages) => [...prevMessages, data]);
-
       } catch (error) {
         setToastMsg({
           open: true,
@@ -64,6 +98,21 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
     // Typing indicator logic can be implemented here if needed
+    if (!socketConnected) return;
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+    const lastTypingTime = new Date().getTime();
+    const timerLength = 3000;
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
   };
 
   const fetchMessages = async () => {
@@ -80,15 +129,15 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
       const { data } = await axios.get(
         `/api/message/${selectedChat._id}`,
-        config
+        config,
       );
       const sortedMessages = data.sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       );
       console.log("Fetched messages:", data);
       setMessages(sortedMessages);
       setLoading(false);
-
+      socket.emit("join chat", selectedChat._id); // Join the chat room for real-time updates
     } catch (error) {
       setToastMsg({
         open: true,
@@ -98,10 +147,27 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
-  useEffect(()=>{
-  fetchMessages();
-},[selectedChat])
+  useEffect(() => {
+    fetchMessages();
+    selectedChatCompare = selectedChat;
+  }, [selectedChat]);
 
+  useEffect(() => {
+    socket.on("message recieved", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        if(!notification.includes(newMessageRecieved)){
+          setNotification([newMessageRecieved, ...notification]);
+          setFetchAgain(!fetchAgain);
+        }
+        
+      } else {
+        setMessages([...messages, newMessageRecieved]);
+      }
+    });
+  });
 
   return (
     <>
@@ -143,35 +209,51 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               </>
             )}
           </Typography>
-          <Box sx={{
+          <Box
+            sx={{
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-end",
               p: 2,
-              background: "rgba(2, 6, 23, 0.5)", 
+              background: "rgba(2, 6, 23, 0.5)",
               borderRadius: "12px",
               border: "1px solid rgba(16, 185, 129, 0.2)",
               overflowY: "hidden",
               width: "100%",
               height: "100%",
-            }}>
-            {
-              loading ? (
-                <CircularProgress 
+            }}
+          >
+            {loading ? (
+              <CircularProgress
                 size={40}
                 sx={{
-                  color:"#383333",
-                  alignSelf:"center",
-                  margin:"auto",
-                }} />
-              ) : (
-                <div className="messages">
-                   <ScrollableChat messages={messages} />
+                  color: "#383333",
+                  alignSelf: "center",
+                  margin: "auto",
+                }}
+              />
+            ) : (
+              <div className="messages">
+                <ScrollableChat messages={messages} />
               </div>
-              )
-            }
-            
-            <FormControl onKeyDown={sendMessage} fullWidth required sx={{ mt: 3 }}>
+            )}
+
+            <FormControl
+              onKeyDown={sendMessage}
+              fullWidth
+              required
+              sx={{ mt: 3 }}
+            >
+              {isTyping ? (
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <Lottie
+                    options={defaultOptions}
+                    width={40}
+                    height={20}
+                    style={{ margin: "5px 0 5px 10px" }}
+                  />
+                </div>
+              ) : null}
               <TextField
                 fullWidth
                 variant="outlined"
@@ -181,23 +263,22 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 sx={{
                   bgcolor: "#E0E0E0",
                   borderRadius: "24px",
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '24px',
-                    bgcolor: '#E0E0E0',
-                    '& fieldset': {
-                      borderColor: '#E0E0E0',
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "24px",
+                    bgcolor: "#E0E0E0",
+                    "& fieldset": {
+                      borderColor: "#E0E0E0",
                     },
-                    '&:hover fieldset': {
-                      borderColor: '#B0B0B0',
+                    "&:hover fieldset": {
+                      borderColor: "#B0B0B0",
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#B0B0B0',
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#B0B0B0",
                     },
                   },
                 }}
               />
             </FormControl>
-
           </Box>
         </>
       ) : (
