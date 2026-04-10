@@ -2,6 +2,8 @@
 
 A **full-stack real-time chat application** built with the **MERN stack** (MongoDB, Express, React, Node.js) and **Socket.IO**. ChatStream supports one-on-one messaging, group chats, real-time typing indicators, user search, and notifications — all wrapped in a modern Material UI interface.
 
+![image](https://github.com/kaushiki-tripathi/ChatStream/blob/c165a64f80ae728a2bf2d5dea37a1fc6ff658a51/Chat%20Interface.png)
+
 ---
 
 ## ✨ Features
