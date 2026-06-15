@@ -109,7 +109,7 @@ ChatStream/
 | React 19 | UI component library |
 | Vite 7 | Build tool & dev server |
 | Material UI (MUI) 7 | Component library & theming |
-| Tailwind CSS 4 | Utility-first CSS framework |
+| Tailwind CSS  | Utility-first CSS framework |
 | Socket.IO Client | Real-time WebSocket communication |
 | Axios | HTTP client for API calls |
 | React Router DOM 7 | Client-side routing |
