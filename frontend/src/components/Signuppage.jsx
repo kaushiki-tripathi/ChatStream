@@ -60,7 +60,6 @@ const Signuppage = () => {
   };
 
   const submitHandler = async () => {
-    setLoading(true);
   if (!name || !email || !password || !confirmpassword) {
     setToastMsg("Please fill all the fields");
     setOpen(true);

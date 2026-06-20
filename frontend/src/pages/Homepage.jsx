@@ -56,9 +56,9 @@ function Homepage() {
           <Box sx={{}}>
             <TabList
               onChange={handleChange}
-              margin-bottom={2}
               centered
               sx={{
+                mb: 2,
                 "& .MuiTabs-indicator": {
                   backgroundColor: "green",
                   height: "4px",

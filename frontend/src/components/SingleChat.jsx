@@ -22,7 +22,7 @@ import io from "socket.io-client";
 import Lottie from "react-lottie";
 import animationData from "../animations/typing.json";
 
-const Endpoint = "http://localhost:5000";
+const Endpoint = import.meta.env.VITE_API_URL || "http://localhost:5000";
 var socket, selectedChatCompare;
 
 const defaultOptions = {
