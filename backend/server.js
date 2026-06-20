@@ -54,7 +54,7 @@ const server=app.listen(PORT,console.log(`Server started on PORT ${PORT}`));
 const io=require('socket.io')(server,{
   pingTimeout:60000,        // To keep the connection alive for a longer time before timing out
   cors:{                    // To allow cross-origin requests from the frontend application
-    origin:"http://localhost:5173",
+    origin: process.env.NODE_ENV === "production" ? "https://yourproductiondomain.com" : "http://localhost:5173",
   },
 });
 
@@ -91,7 +91,7 @@ io.on("connection",(socket)=>{
       return console.log("Chat.users not defined");
 
      chat.users.forEach(user=>{
-      if(user._id==newMessageRecieved.sender._id) return;  // Don't send the message to the sender
+      if(user._id===newMessageRecieved.sender._id) return;  // Don't send the message to the sender
 
       socket.in(user._id).emit("message recieved",newMessageRecieved);  // Send the message to all other users in the chat
      });

@@ -30,7 +30,7 @@ UserSchema.methods.matchPassword=async function(enteredPassword){
 
 UserSchema.pre('save',async function(next){              // Before saving the user, we need to hash the password
   if(!this.isModified('password')){                      //If password is not modified, move to the next middleware 
-    next();
+    return next();
   } 
   const salt=await bcrypt.genSalt(10);                   //Generating a salt(it is a ) for hashing
   this.password=await bcrypt.hash(this.password,salt);   //Hashing the password with the salt  

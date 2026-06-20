@@ -9,6 +9,6 @@ router.get('/',protect,fetchChats);    //Route for fetching all chats of the log
 router.post('/group',protect,createGroupChat);  //Route for creating a group chat
 router.put('/rename',protect,renameGroup);  // Route for renaming a group chat
 router.put('/groupadd',protect,addToGroup);  //Route for adding a user to a group chat
-router.put('/groupremove',protect,removeFromGroup);  //Route for removing a user from a group chat  */
+router.put('/groupremove',protect,removeFromGroup);  //Route for removing a user from a group chat
 
 module.exports=router;
