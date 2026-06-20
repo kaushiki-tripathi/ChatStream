@@ -2,6 +2,8 @@
 
 A **full-stack real-time chat application** built with the **MERN stack** (MongoDB, Express, React, Node.js) and **Socket.IO**. ChatStream supports one-on-one messaging, group chats, real-time typing indicators, user search, and notifications — all wrapped in a modern Material UI interface.
 
+![image](https://github.com/kaushiki-tripathi/ChatStream/blob/c165a64f80ae728a2bf2d5dea37a1fc6ff658a51/Chat%20Interface.png)
+
 ---
 
 ## ✨ Features
@@ -107,7 +109,7 @@ ChatStream/
 | React 19 | UI component library |
 | Vite 7 | Build tool & dev server |
 | Material UI (MUI) 7 | Component library & theming |
-| Tailwind CSS 4 | Utility-first CSS framework |
+| Tailwind CSS  | Utility-first CSS framework |
 | Socket.IO Client | Real-time WebSocket communication |
 | Axios | HTTP client for API calls |
 | React Router DOM 7 | Client-side routing |
@@ -185,83 +187,8 @@ npm start
 # Terminal 2 — Frontend
 cd frontend
 npm run dev
-```
-
-| Service | URL |
-|---|---|
-| Frontend | `http://localhost:5173` |
-| Backend API | `http://localhost:5000` |
-
 ---
-
-## 📡 API Reference
-
-### User Routes — `/api/user`
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/user/register` | ❌ | Register a new user |
-| `POST` | `/api/user/login` | ❌ | Authenticate & get token |
-| `GET` | `/api/user?search=` | ✅ | Search users by name/email |
-
-### Chat Routes — `/api/chat`
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/chat` | ✅ | Access or create a one-on-one chat |
-| `GET` | `/api/chat` | ✅ | Fetch all chats for logged-in user |
-| `POST` | `/api/chat/group` | ✅ | Create a new group chat |
-| `PUT` | `/api/chat/rename` | ✅ | Rename a group chat |
-| `PUT` | `/api/chat/groupadd` | ✅ | Add a user to a group |
-| `PUT` | `/api/chat/groupremove` | ✅ | Remove a user from a group |
-
-### Message Routes — `/api/message`
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/message/:chatId` | ✅ | Fetch all messages in a chat |
-| `POST` | `/api/message` | ✅ | Send a new message |
-
-### Socket.IO Events
-
-| Event | Direction | Description |
-|---|---|---|
-| `setup` | Client → Server | Initialize user room on connection |
-| `join chat` | Client → Server | Join a specific chat room |
-| `new message` | Client → Server | Broadcast a new message to chat participants |
-| `typing` | Client → Server | Notify room that a user is typing |
-| `stop typing` | Client → Server | Notify room that a user stopped typing |
-| `message recieved` | Server → Client | Deliver a new message to recipients |
-| `connected` | Server → Client | Confirm socket connection established |
-
----
-
-## 🏭 Production Build
-
-Build and serve the frontend from the Express server:
-
-```bash
-cd backend
-npm run build    # Installs deps & builds frontend
 ```
-
-Set `NODE_ENV=production` in `.env`, then:
-
-```bash
-npm start
-```
-
-The app will serve the React build at `http://localhost:5000`.
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ---
 
@@ -270,7 +197,3 @@ The app will serve the React build at `http://localhost:5000`.
 **Kaushiki Tripathi**
 
 ---
-
-## 📄 License
-
-This project is licensed under the **ISC License**.
